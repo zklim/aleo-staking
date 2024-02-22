@@ -22,6 +22,7 @@ const convertLeoToTs = async (filePath: string) => {
   let collecting = false;
   let collectedLines: string[] = [];
   let nestedLevel = 0;
+  let endBracketFound = false;
   for await (const line of rl) {
     const trimmedLine = line.trim();
     // Check if we're starting a record or struct
@@ -29,22 +30,29 @@ const convertLeoToTs = async (filePath: string) => {
       || trimmedLine.startsWith('struct')
       || trimmedLine.startsWith('transition')
       || trimmedLine.startsWith('finalize')) {
-      nestedLevel++;
+      nestedLevel += (line.match(/\{/g) || []).length;
+      const endBrackets = (line.match(/\}/g) || []).length;
+      if (endBrackets > 0) {
+        endBracketFound = true;
+      }
+      nestedLevel -= endBrackets;
       collecting = true;
       collectedLines.push(line);
     } else if (collecting) {
       collectedLines.push(line);
       // Check if we're ending a record or struct
-      if (trimmedLine.includes('}')) {
-          nestedLevel--;
+      // Adjust brackets count based on the current line
+      nestedLevel += (line.match(/\{/g) || []).length;
+      const endBrackets = (line.match(/\}/g) || []).length;
+      if (endBrackets > 0) {
+        endBracketFound = true;
       }
-      if (trimmedLine.includes('{')) {
-          nestedLevel++;
-      }
-      if (nestedLevel === 0) {
+      nestedLevel -= endBrackets;
+      if (nestedLevel === 0 && endBracketFound) {
         tsCode = parseAndConvertBlock(collectedLines, tsCode);
         collecting = false;
         collectedLines = [];
+        endBracketFound = false;
       }
     } else {
       // Each line in input.txt will be successively available here as `line`.
@@ -110,9 +118,13 @@ const parseAndConvertBlock = (leoLines: string[], tsCode: string): string => {
   // Determine if it's a record or struct and extract the name
   const firstLine = leoLines[0].trim();
   if (firstLine.startsWith('record') || firstLine.startsWith('struct')) {
+    console.log('Converting record/struct', leoLines[0]);
     tsCode = convertToInterface(leoLines, tsCode);
   } else if (firstLine.startsWith('transition')) {
+    console.log('Converting transition', leoLines[0]);
     tsCode = convertTransition(leoLines, tsCode);
+  } else {
+    console.log('Missed this line:', firstLine);
   }
   return tsCode;
 }
@@ -133,12 +145,11 @@ const convertType = (leoType: string): string => {
     case 'bool':
       return 'boolean';
     default:
-      return 'any'; // Default fallback
+      return leoType; // Default fallback
   }
 };
 
 const convertValue = (leoValue: string, leoType: string): string => {
-  console.log(`Converting value: ${leoValue} to type: ${leoType}`);
   switch (leoType) {
     case 'string':
       return `"${leoValue}"`;
@@ -190,7 +201,51 @@ const convertToInterface = (leoLines: string[], tsCode: string): string => {
 
 const convertTransition = (leoLines: string[], tsCode: string): string => {
   const name = (leoLines[0].trim().match(/transition\s+(\w+)/))![1];
-  return tsCode += `  ${name}() {\n  }\n`;
+  let transitionTs = "";
+  let argsString = "";
+  let collectingArgs = true;
+  let parenthesesCount = 0;
+  leoLines.forEach(line => {
+    if (collectingArgs) {
+      // Adjust parentheses count based on the current line
+      parenthesesCount += (line.match(/\(/g) || []).length;
+      parenthesesCount -= (line.match(/\)/g) || []).length;
+
+      // Collect arguments within parentheses
+      if (line.includes('(') || line.includes(')')) {
+        const lastIndex = line.indexOf(')') > 0 ? line.indexOf(')') : line.length;
+        const argsPart = line.substring(line.indexOf('(') + 1, lastIndex);
+        console.log('argsPart:', argsPart);
+        argsString += argsPart;
+      } else {
+        argsString += line;
+      }
+
+      // If parentheses count reaches 0, we've collected all arguments
+      if (parenthesesCount === 0) {
+        collectingArgs = false;
+        // Split arguments by comma and trim each argument
+        const args = argsString.split(',').map(arg => arg.trim());
+        const argsTS = convertArgs(args);
+        transitionTs = `${TAB}${name}(\n${argsTS}${TAB}) {\n  }\n`;
+      }
+    }
+  });
+  return tsCode += transitionTs;
+}
+
+const convertArgs = (leoArgs: string[]): string => {
+  return leoArgs.map(arg => {
+    // Remove the 'private' or 'public' identifier and trim any leading/trailing whitespace
+    const cleanArg = arg.replace(/(private|public)\s+/, '').trim();
+
+    // Split the cleaned argument into name and type
+    const [name, type] = cleanArg.split(':').map(part => part.trim());
+    const tsType = convertType(type);
+
+    return `${TAB}${TAB}${name}: ${tsType},\n`;
+  }).join('');
+
 }
 
 const convertConst = (leoLine: string, tsCode: string): string => {

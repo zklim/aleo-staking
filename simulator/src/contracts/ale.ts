@@ -31,23 +31,69 @@ export class ale {
   // TODO: replace with ARC-20 standard, plus burn/mint
 // 0u8 -- total minted
 // 1u8 -- total burned
-  approve_public() {
+  approve_public(
+    spender: string,
+    amount: bigint,
+  ) {
   }
-  unapprove_public() {
+  unapprove_public(
+    spender: string,
+    amount: bigint,
+  ) {
   }
-  transfer_from_public() {
+  transfer_from_public(
+    approver: string,
+    receiver: string,
+    amount: bigint,
+  ) {
   }
-  transfer_public() {
+  transfer_public(
+    receiver: string,
+    amount: bigint,
+  ) {
   }
-  transfer_private() {
+  transfer_private(
+    input_record: token,
+    receiver: string,
+    amount: bigint,
+  ) {
   }
-  transfer_private_to_public() {
+  transfer_private_to_public(
+    input_record: token,
+    receiver: string,
+    amount: bigint,
+  ) {
   }
-  transfer_public_to_private() {
+  transfer_public_to_private(
+    receiver: string,
+    amount: bigint,
+  ) {
   }
-  mint_private() {
+  mint_private(
+    amount: bigint,
+    receiver: string,
+  ) {
   }
-  mint_public() {
+  mint_public(
+    amount: bigint,
+    receiver: string,
+  ) {
+  }
+  burn_private(
+    input_record: token,
+    ale_burn_amount: bigint,
+    credits_claim_amount: bigint,
+    min_block_height: u32) -> (,
+  ) {
+  }
+  claim_credits(
+    claim_record: claim,
+  ) {
+  }
+  assert_totals(
+    total_minted: bigint,
+    total_burned: bigint,
+  ) {
   }
 
 }

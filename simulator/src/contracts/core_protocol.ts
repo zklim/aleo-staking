@@ -19,10 +19,13 @@ interface state {
 }
 export class core_protocol {
   // params
+  static readonly WITHDRAW_FEE = BigInt(30u128);
+  static readonly WITHDRAW_WAIT_MINIMUM = BigInt(15_000u32);
+  withdraw_pool: Map<bigint, bigint> = new Map();
   protocol_state: Map<bigint, bigint> = new Map();
   last_rebalance_height: Map<bigint, bigint> = new Map();
   core_protocol_balance: Map<bigint, bigint> = new Map();
-  delegator_state: Map<string, any> = new Map();
+  delegator_state: Map<string, state> = new Map();
   delegator_performance: Map<string, bigint> = new Map();
   portion_delegator: Map<bigint, string> = new Map();
   boost_pool: Map<string, bigint> = new Map();
@@ -96,5 +99,100 @@ export class core_protocol {
 // 3u8: upcoming protocol mint rewards and protocol fee
 // 4u8: upcoming protocol rebalance redistribution
 // 10u8: protocol withdraw unbonding in progress
+  boost(
+    boostee: string,
+    amount: bigint,
+    input_record: credits.aleo/credits,
+  ) {
+  }
+  clear_boost_pool(
+    boostee: string,
+  ) {
+  }
+// 15 is the max amount we can clear in a single transaction without running into constraint limits
+  clear_boost_pool_bulk(
+    boostees: [address; 15],
+  ) {
+  }
+  prep_rebalance(
+    current_validators: [address; 5],
+    new_validators: [address; 5],
+    performances: [u64; 5],
+    unbond_amounts: [u64; 5],
+    reward_amounts: [u64; 5],
+    ideal_portions: [u128; 5],
+  ) {
+  }
+  rebalance_unbond(
+    unbond_amounts: [u64; 5],
+    reward_amounts: [u64; 5],
+    : undefined,
+  ) {
+  }
+  rebalance_collect_rewards(
+    current_validators: [address; 5],
+    new_validators: [address; 5],
+    reward_amounts: [u64; 5],
+    validator_mint_amounts: [u64; 5],
+    total_ale_minted: bigint,
+    total_ale_burned: bigint,
+  ) {
+  }
+  rebalance_claim_unbond(
+    unbond_amounts: [u64; 5],
+  ) {
+  }
+  rebalance_redistribute(
+    rebond_amounts: [u64; 5],
+    validators: [address; 5],
+  ) {
+  }
+// in the event we are changing validators, unbonding once may not actually clear the full balance because of
+// block reward timing. In that case, we need to clear the residual bonded amounts
+  clear_residual_delegators(
+    residual_amounts: [u64; 5],
+  ) {
+  }
+  fix_orphaned_delegators(
+    amounts: [u64; 5],
+  ) {
+  }
+  create_withdraw_claim(
+    ale_record: ale.aleo/token.record,
+    current_height: bigint,
+    total_ale_minted: bigint,
+    total_ale_burned: bigint,
+    // total amount of ale to burn: undefined,
+    including fee    ale_burn_amount: bigint,
+    // amount of credits to claim: undefined,
+    minus fee    credits_claim_amount: bigint,
+    : undefined,
+  ) {
+  }
+  withdraw_unbond(
+    unbond_amounts: [u64; 5],
+    total_amount: bigint,
+    withdraw_block: bigint,
+  ) {
+  }
+  withdraw_claim_unbond(
+    unbond_amounts: [u64; 5],
+  ) {
+  }
+  deposit_private(
+    input_record: credits.aleo/credits,
+    credits_deposit: bigint,
+    referrer: string,
+    total_ale_minted: bigint,
+    total_ale_burned: bigint,
+    ale_to_mint: bigint,
+    average_block_reward: bigint,
+  ) {
+  }
+  bond_deposit_pool(
+    validators: [address; 5],
+    transfer_amounts: [u64; 5],
+  ) {
+  }
 
 }
