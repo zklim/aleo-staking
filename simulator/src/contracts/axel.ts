@@ -1,5 +1,3 @@
-import { credits } from './credits';
-import { creditsProgram } from './credits';
 
 import assert from 'assert';
 // interfaces
@@ -7,16 +5,11 @@ export interface approval {
   approver: string;
   spender: string;
 }
-export interface claim {
-  owner: string;
-  amount: bigint;
-  min_claim_height: bigint;
-}
 export interface token {
   owner: string;
   amount: bigint;
 }
-export class aleProgram {
+export class axelProgram {
   caller: string = "not set";
   block: {
     height: bigint;
@@ -25,21 +18,15 @@ export class aleProgram {
   approvals: Map<string, bigint> = new Map();
   totals: Map<bigint, bigint> = new Map();
   account: Map<string, bigint> = new Map();
-  CORE_PROTOCOL = "aleo1v7zqs7fls3ryy8dvtl77ytszk4p9af9mxx2kclq529jd3et7hc8qqlhsq0";
-  credits: creditsProgram;
   constructor(
     // constructor args
-    creditsContract: creditsProgram,
   ) {
     // constructor body
-    this.credits = creditsContract;
   }
   // TODO: replace with ARC-20 standard, plus burn/mint
-    
-  //program ale.aleo {    
+  //program axel.aleo {    
 // 0u8 -- total minted
 // 1u8 -- total burned
-    
     
     
     
@@ -210,28 +197,6 @@ export class aleProgram {
     this.account.set(sender, new_sender_balance);
     }
     
-  mint_private(
-    amount: bigint,
-    receiver: string,
-  ) {
-// assert self.caller == address of core_protocol.aleo;
-    let output_record: token = {
-    owner: receiver,
-    amount: amount
-    };
-    
-    this.finalize_mint_private (amount);
-    return output_record;  
-}
-    
-  finalize_mint_private(
-    amount: bigint,
-  ) {
-    let total_minted: bigint = this.this.totals.get(BigInt("0"))! || BigInt("0");
-    let new_total_minted: bigint = total_minted + amount;
-    this.totals.set(BigInt("0"), new_total_minted);
-    }
-    
   mint_public(
     amount: bigint,
     receiver: string,
@@ -239,84 +204,58 @@ export class aleProgram {
 // assert self.caller == address of core_protocol.aleo;
     
     return this.finalize_mint_public (amount, receiver);
+    
     }
     
   finalize_mint_public(
     amount: bigint,
     receiver: string,
   ) {
-    let total_minted: bigint = this.this.totals.get(BigInt("0"))! || BigInt("0");
+    let total_minted: bigint = this.totals.get(BigInt("0"))! || BigInt("0");
+// one time mint
+    assert(total_minted === BigInt("0"));
     let new_total_minted: bigint = total_minted + amount;
     this.totals.set(BigInt("0"), new_total_minted);
     
-    let receiver_balance: bigint = this.this.account.get(receiver)! || BigInt("0");
+    let receiver_balance: bigint = this.account.get(receiver)! || BigInt("0");
     let new_receiver_balance: bigint = receiver_balance + amount;
     this.account.set(receiver, new_receiver_balance);
     }
     
   burn_private(
     input_record: token,
-    ale_burn_amount: bigint,
-    credits_claim_amount: bigint,
-    min_block_height: bigint,
   ) {
-    assert(this.caller === this.CORE_PROTOCOL);
-    let output_token: token = {
-    owner: input_record.owner,
-    amount: input_record.amount - ale_burn_amount
-    };
-    let output_claim: claim = {
-    owner: input_record.owner,
-    amount: credits_claim_amount,
-    min_claim_height: min_block_height
-    };
-    
-    this.finalize_burn_private(ale_burn_amount);
-    return [output_token, output_claim];  
-}
+// assert self.caller == address of core_protocol.aleo;
+    return this.finalize_burn_private(input_record.amount);
+    }
     
   finalize_burn_private(
     amount: bigint,
   ) {
-    let total_burned: bigint = this.this.totals.get(BigInt("1"))! || BigInt("0");
+    let total_burned: bigint = this.totals.get(BigInt("1"))! || BigInt("0");
     let new_total_burned: bigint = total_burned + amount;
     this.totals.set(BigInt("1"), new_total_burned);
     }
     
-  claim_credits(
-    claim_record: claim,
-  ) {
-    assert(this.caller === claim_record.owner);
-    
-    this.credits.caller = "contract";
-    let credits_record: credits = this.credits.transfer_public_to_private(claim_record.owner, claim_record.amount);
-    
-    this.finalize_claim_credits(claim_record.amount, claim_record.min_claim_height);
-    return [credits_record];  
-}
-    
-  finalize_claim_credits(
+  burn_public(
+    burner: string,
     amount: bigint,
-    min_claim_height: bigint,
   ) {
-    assert(this.block.height >= min_claim_height);
+// assert self.caller == address of core_protocol.aleo;
+    return this.finalize_burn_public(burner, amount);
     }
     
-  assert_totals(
-    total_minted: bigint,
-    total_burned: bigint,
+  finalize_burn_public(
+    burner: string,
+    amount: bigint,
   ) {
-    return this.finalize_assert_totals(total_minted, total_burned);
-    }
+    let burner_balance: bigint = this.account.get(burner)! || BigInt("0");
+// TODO: Check, should be protected by underflow
+    let new_burner_balance: bigint = burner_balance - amount;
+    this.account.set(burner, new_burner_balance);
     
-  finalize_assert_totals(
-    total_minted: bigint,
-    total_burned: bigint,
-  ) {
-    let minted: bigint = this.this.totals.get(BigInt("0"))! || BigInt("0");
-    let burned: bigint = this.this.totals.get(BigInt("1"))! || BigInt("0");
-    
-    assert(minted === total_minted);
-    assert(burned === total_burned);
+    let total_burned: bigint = this.totals.get(BigInt("1"))! || BigInt("0");
+    let new_total_burned: bigint = total_burned + amount;
+    this.totals.set(BigInt("1"), new_total_burned);
     }
     }
