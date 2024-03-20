@@ -138,7 +138,7 @@ program arc_0038.aleo {
     total_shares.set(0u8, current_shares + new_commission_shares);
     total_balance.set(0u8, current_balance + new_commission);
 
-    commission_percent.set(0u8, commission_rate);
+    commission_percent.set(0u8, new_commission_rate);
   }
 
   // Update the validator address, to be applied automatically on the next bond_all call

@@ -149,7 +149,7 @@ finalize set_commission_percent:
     set r26 into total_shares[0u8];
     add r13 r11 into r27;
     set r27 into total_balance[0u8];
-    set r7 into commission_percent[0u8];
+    set r0 into commission_percent[0u8];
 
 
 function set_next_validator:
