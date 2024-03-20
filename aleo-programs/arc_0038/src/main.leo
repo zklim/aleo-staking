@@ -123,7 +123,7 @@ program arc_0038.aleo {
 
   finalize set_commission_percent(new_commission_rate: u128) {
     // Make sure all commission is claimed before changing the rate
-    let bonded: u64 = pending_withdrawal.get(1u8); // credits.aleo/bonded.get(CORE_PROTOCOL);
+    let bonded: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/bonded.get(CORE_PROTOCOL).microcredits;
     let current_balance: u64 = total_balance.get(0u8);
     let current_shares: u64 = total_shares.get(0u8);
     let rewards: u64 = bonded > current_balance ? bonded - current_balance : 0u64;
@@ -163,7 +163,7 @@ program arc_0038.aleo {
     assert(next_validator);
 
     // Make sure all commission is claimed before unbonding
-    let bonded: u64 = pending_withdrawal.get(1u8); // credits.aleo/bonded.get(CORE_PROTOCOL);
+    let bonded: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/bonded.get(CORE_PROTOCOL).microcredits;
     let current_balance: u64 = total_balance.get(0u8);
     let current_shares: u64 = total_shares.get(0u8);
     let rewards: u64 = bonded > current_balance ? bonded - current_balance : 0u64;
@@ -201,10 +201,10 @@ program arc_0038.aleo {
   }
 
   finalize bond_all(validator_address: address, amount: u64) {
-    let unbonding_balance: u64 = pending_withdrawal.get(1u8); // credits.aleo/unbonding.get(CORE_PROTOCOL);
+    let unbonding_balance: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/unbonding.get(CORE_PROTOCOL).microcredits;
     assert_eq(unbonding_balance, 0u64);
 
-    let account_balance: u64 = pending_withdrawal.get(1u8); // credits.aleo/account.get(CORE_PROTOCOL);
+    let account_balance: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/account.get(CORE_PROTOCOL);
     let pending_withdrawals: u64 = pending_withdrawal.get(0u8);
     let available_balance: u64 = account_balance - pending_withdrawals;
     assert_eq(amount, available_balance);
@@ -225,7 +225,7 @@ program arc_0038.aleo {
 
   finalize claim_commission() {
     // Distribute shares for new commission
-    let bonded: u64 = pending_withdrawal.get(1u8); // credits.aleo/bonded.get(CORE_PROTOCOL);
+    let bonded: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/bonded.get(CORE_PROTOCOL).microcredits;
     let current_balance: u64 = total_balance.get(0u8);
     let current_shares: u64 = total_shares.get(0u8);
     let rewards: u64 = bonded > current_balance ? bonded - current_balance : 0u64;
@@ -256,7 +256,7 @@ program arc_0038.aleo {
     microcredits: u64
   ) {
     // Distribute shares for new commission
-    let bonded: u64 = pending_withdrawal.get(1u8); // credits.aleo/bonded.get(CORE_PROTOCOL);
+    let bonded: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/bonded.get(CORE_PROTOCOL).microcredits;
     let current_balance: u64 = total_balance.get(0u8);
     let current_shares: u64 = total_shares.get(0u8);
     let rewards: u64 = bonded > current_balance ? bonded - current_balance : 0u64;
@@ -311,7 +311,7 @@ program arc_0038.aleo {
     assert(delegator_balance >= withdrawal_shares);
 
     // Distribute shares for new commission
-    let bonded: u64 = pending_withdrawal.get(1u8); // credits.aleo/bonded.get(CORE_PROTOCOL);
+    let bonded: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/bonded.get(CORE_PROTOCOL).microcredits;
     let current_balance: u64 = total_balance.get(0u8);
     let current_shares: u64 = total_shares.get(0u8);
     let rewards: u64 = bonded > current_balance ? bonded - current_balance : 0u64;
@@ -371,7 +371,7 @@ program arc_0038.aleo {
     let currently_withdrawing: bool = withdrawals.contains(owner);
     assert_eq(currently_withdrawing, false);
 
-    let bonded: u64 = pending_withdrawal.get(1u8); // credits.aleo/bonded.get(CORE_PROTOCOL);
+    let bonded: u64 = withdrawals.get(CORE_PROTOCOL).microcredits; // credits.aleo/bonded.get(CORE_PROTOCOL).microcredits;
     assert_eq(bonded, 0u64);
 
     // Assert that they have enough to withdraw

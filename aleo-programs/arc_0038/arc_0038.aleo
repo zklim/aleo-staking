@@ -122,8 +122,8 @@ finalize set_commission_percent:
     get.or_use credits.aleo/bonded[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r1;
     get total_balance[0u8] into r2;
     get total_shares[0u8] into r3;
-    gt r1 r2 into r4;
-    sub r1 r2 into r5;
+    gt r1.microcredits r2 into r4;
+    sub r1.microcredits r2 into r5;
     ternary r4 r5 0u64 into r6;
     get commission_percent[0u8] into r7;
     cast r6 into r8 as u128;
@@ -178,8 +178,8 @@ finalize unbond_all:
     get.or_use credits.aleo/bonded[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r3;
     get total_balance[0u8] into r4;
     get total_shares[0u8] into r5;
-    gt r3 r4 into r6;
-    sub r3 r4 into r7;
+    gt r3.microcredits r4 into r6;
+    sub r3.microcredits r4 into r7;
     ternary r6 r7 0u64 into r8;
     get commission_percent[0u8] into r9;
     cast r8 into r10 as u128;
@@ -205,7 +205,7 @@ finalize unbond_all:
     set r28 into total_shares[0u8];
     add r15 r13 into r29;
     set r29 into total_balance[0u8];
-    sub r3 r1 into r30;
+    sub r3.microcredits r1 into r30;
     lt r30 10_000_000_000u64 into r31;
     assert.eq r31 true;
 
@@ -234,10 +234,10 @@ finalize bond_all:
     input r2 as u64.public;
     await r0;
     get.or_use credits.aleo/unbonding[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r3;
-    assert.eq r3 0u64;
+    assert.eq r3.microcredits 0u64;
     get.or_use credits.aleo/account[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r4;
     get pending_withdrawal[0u8] into r5;
-    sub r4 r5 into r6;
+    sub r4.microcredits r5 into r6;
     assert.eq r2 r6;
     contains validator[1u8] into r7;
     get validator[1u8] into r8;
@@ -257,8 +257,8 @@ finalize claim_commission:
     get.or_use credits.aleo/bonded[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r0;
     get total_balance[0u8] into r1;
     get total_shares[0u8] into r2;
-    gt r0 r1 into r3;
-    sub r0 r1 into r4;
+    gt r0.microcredits r1 into r3;
+    sub r0.microcredits r1 into r4;
     ternary r3 r4 0u64 into r5;
     get commission_percent[0u8] into r6;
     cast r5 into r7 as u128;
@@ -302,8 +302,8 @@ finalize deposit_public:
     get.or_use credits.aleo/bonded[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r3;
     get total_balance[0u8] into r4;
     get total_shares[0u8] into r5;
-    gt r3 r4 into r6;
-    sub r3 r4 into r7;
+    gt r3.microcredits r4 into r6;
+    sub r3.microcredits r4 into r7;
     ternary r6 r7 0u64 into r8;
     get commission_percent[0u8] into r9;
     cast r8 into r10 as u128;
@@ -377,8 +377,8 @@ finalize withdraw_public:
     get.or_use credits.aleo/bonded[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r12;
     get total_balance[0u8] into r13;
     get total_shares[0u8] into r14;
-    gt r12 r13 into r15;
-    sub r12 r13 into r16;
+    gt r12.microcredits r13 into r15;
+    sub r12.microcredits r13 into r16;
     ternary r15 r16 0u64 into r17;
     get commission_percent[0u8] into r18;
     cast r17 into r19 as u128;
@@ -441,7 +441,7 @@ finalize create_withdraw_claim:
     contains withdrawals[r1] into r2;
     assert.eq r2 false;
     get.or_use credits.aleo/bonded[aleo17hwvp7fl5da40hd29heasjjm537uqce489hhuc3lwhxfm0njucpq0rvfny] 0u64 into r3;
-    assert.eq r3 0u64;
+    assert.eq r3.microcredits 0u64;
     get delegator_shares[r1] into r4;
     gte r4 r0 into r5;
     assert.eq r5 true;
